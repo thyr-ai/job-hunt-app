@@ -1,0 +1,26 @@
+[
+    {
+        "company": "Dustin",
+        "title": "Junior Bid Manager",
+        "applied_date": "2024-11-12",
+        "status": "Avslag",
+        "url": "https://career.dustingroup.com/jobs/1",
+        "notes": "Andra intervjun, föll på målsnöret."
+    },
+    {
+        "company": "Atea",
+        "title": "Anbudsspecialist",
+        "applied_date": "2025-01-05",
+        "status": "Sökt",
+        "url": "https://atea.se/karriar/anbud",
+        "notes": "Väntar på svar."
+    },
+    {
+        "company": "Svevia",
+        "title": "Projektledare",
+        "applied_date": "2023-05-20",
+        "status": "Ej valt",
+        "url": "https://svevia.se/jobb/2",
+        "notes": "Gammal ansökan."
+    }
+]

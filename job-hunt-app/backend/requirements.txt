@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+gunicorn
+python-multipart
+pandas
+fpdf
