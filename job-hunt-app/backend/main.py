@@ -124,7 +124,7 @@ async def search_jobs():
         # Check date
         try:
             deadline_date = datetime.strptime(job["deadline"], "%Y-%m-%d")
-            if now < deadline_date <= max_date:
+            if now <= deadline_date <= max_date:
                 valid_targets.append(job)
         except (ValueError, KeyError):
             # If no deadline or bad format, it might be a fallback/ongoing role
