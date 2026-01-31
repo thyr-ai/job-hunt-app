@@ -18,6 +18,10 @@ if not os.path.exists(static_dir):
     os.makedirs(static_dir)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+@app.get("/")
+async def root():
+    return {"message": "Job Hunt API is running!", "docs": "/docs"}
+
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
