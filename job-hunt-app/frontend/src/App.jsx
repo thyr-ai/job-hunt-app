@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { CommentBox } from './components/DashboardComponents'
 
-const API_BASE = 'https://job-hunt-app-kkr6.onrender.com/api'
+// Use relative path so Vite proxy can handle it (bypasses CORS/Antivirus issues)
+const API_BASE = '/api'
 
 function App() {
     const [profile, setProfile] = useState(null)
@@ -87,11 +88,18 @@ function App() {
                 company: job.company
             })
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`Server svarade med status ${res.status}`);
+                return res.json();
+            })
             .then(data => {
                 setCvMatchData(data)
                 setCurrentStep(3)
             })
+            .catch(err => {
+                console.error("Match error:", err);
+                alert("Kunde inte generera CV-matchning. Kontrollera att backend är uppdaterad.");
+            });
     }
 
     const downloadPdf = () => {
@@ -130,10 +138,10 @@ function App() {
                         fontSize: '2rem',
                         boxShadow: '0 10px 20px rgba(99, 102, 241, 0.3)'
                     }}>
-                        {profile.kontakt_info.namn.charAt(0)}
+                        {profile?.kontakt_info?.namn?.charAt(0) || '?'}
                     </div>
-                    <h1 style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{profile.kontakt_info.namn}</h1>
-                    <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>{profile.kontakt_info.titel}</p>
+                    <h1 style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{profile?.kontakt_info?.namn}</h1>
+                    <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>{profile?.kontakt_info?.titel}</p>
                 </div>
 
                 <nav className="card">
@@ -303,7 +311,9 @@ function App() {
                         <div className="card workflow-stepper" style={{ marginBottom: '1.5rem' }}>
                             <div className="stepper">
                                 <div className={`step-item ${currentStep >= 1 ? 'active' : ''}`} onClick={() => setCurrentStep(1)}>Mejl</div>
-                                <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>Brev</div>
+                                {selectedJob.type !== 'spontaneous' && (
+                                    <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`} onClick={() => setCurrentStep(2)}>Brev</div>
+                                )}
                                 <div className={`step-item ${currentStep >= 3 ? 'active' : ''}`} onClick={() => setCurrentStep(3)}>CV</div>
                             </div>
                         </div>
@@ -318,7 +328,15 @@ function App() {
                                     onChange={(e) => setGeneratedEmail(e.target.value)}
                                     style={{ minHeight: '120px' }}
                                 />
-                                <button style={{ marginTop: '1rem' }} onClick={() => setCurrentStep(2)}>Nästa: Skriv Brev</button>
+                                <button style={{ marginTop: '1rem' }} onClick={() => {
+                                    if (selectedJob.type === 'spontaneous') {
+                                        fetchCvMatch(selectedJob);
+                                    } else {
+                                        setCurrentStep(2);
+                                    }
+                                }}>
+                                    {selectedJob.type === 'spontaneous' ? 'Nästa: CV-Highlight' : 'Nästa: Skriv Brev'}
+                                </button>
                             </div>
                         )}
 
@@ -355,13 +373,40 @@ function App() {
                         {currentStep === 3 && cvMatchData && (
                             <div className="card animate-fade">
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }} className="no-print">
-                                    <button style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => setCurrentStep(2)}>← Tillbaka</button>
+                                    <button style={{ background: 'rgba(255,255,255,0.1)' }} onClick={() => {
+                                        if (selectedJob.type === 'spontaneous') {
+                                            setCurrentStep(1);
+                                        } else {
+                                            setCurrentStep(2);
+                                        }
+                                    }}>← Tillbaka</button>
                                     <div style={{ display: 'flex', gap: '1rem' }}>
                                         <button onClick={() => window.print()} style={{ background: 'var(--accent-secondary)' }}>🖨️ Skriv ut</button>
                                         <button
                                             onClick={() => {
-                                                navigator.clipboard.writeText(`${cvMatchData.summary}\n\nTOP MATCHES:\n${cvMatchData.matches.join('\n')}`)
-                                                alert('Text kopierad!')
+                                                const contact = cvMatchData.profile.kontakt_info;
+                                                const exp = cvMatchData.profile.erfarenhet.map(e => `• ${e.roll} @ ${e.foretag} (${e.period})\n  ${e.beskrivning}`).join('\n\n');
+                                                const edu = cvMatchData.profile.utbildning.map(u => `• ${u.program}, ${u.skola} (${u.period})`).join('\n');
+                                                const matches = cvMatchData.matches.map(m => `[MATCH] ${m}`).join('\n');
+
+                                                const text = `
+${contact.namn.toUpperCase()} - ${contact.titel}
+${contact.e_post} | ${contact.telefon} | ${contact.plats}
+
+INTRODUKTION
+${cvMatchData.summary}
+
+TOPP 5 MATCHNINGAR FÖR ${selectedJob.company.toUpperCase()}
+${matches}
+
+ARBETSLIVSERFARENHET (URVAL)
+${exp}
+
+UTBILDNING
+${edu}
+`.trim();
+                                                navigator.clipboard.writeText(text);
+                                                alert('CV kopierat med fullständig information!');
                                             }}
                                             style={{ background: 'rgba(255,255,255,0.1)' }}
                                         >
@@ -374,13 +419,13 @@ function App() {
                                     <div className="document-header">
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <div>
-                                                <h2>{cvMatchData.profile.kontakt_info.namn}</h2>
-                                                <p style={{ color: '#666', fontSize: '0.9rem' }}>{cvMatchData.profile.kontakt_info.titel}</p>
+                                                <h2>{cvMatchData?.profile?.kontakt_info?.namn}</h2>
+                                                <p style={{ color: '#666', fontSize: '0.9rem' }}>{cvMatchData?.profile?.kontakt_info?.titel}</p>
                                             </div>
                                             <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#666' }}>
-                                                <p>{cvMatchData.profile.kontakt_info.e_post}</p>
-                                                <p>{cvMatchData.profile.kontakt_info.telefon}</p>
-                                                <p>{cvMatchData.profile.kontakt_info.plats}</p>
+                                                <p>{cvMatchData?.profile?.kontakt_info?.e_post}</p>
+                                                <p>{cvMatchData?.profile?.kontakt_info?.telefon}</p>
+                                                <p>{cvMatchData?.profile?.kontakt_info?.plats}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -388,14 +433,14 @@ function App() {
                                     <div className="document-section">
                                         <h3>Introduktion</h3>
                                         <p style={{ fontSize: '1.05rem', fontStyle: 'italic', color: '#2c3e50' }}>
-                                            {cvMatchData.summary}
+                                            {cvMatchData?.summary}
                                         </p>
                                     </div>
 
                                     <div className="document-section">
                                         <h3>Topp 5 Matchningar för {selectedJob.company}</h3>
                                         <ul className="match-list">
-                                            {cvMatchData.matches.map((m, i) => (
+                                            {cvMatchData?.matches?.map((m, i) => (
                                                 <li key={i} style={{ fontWeight: 600 }}>{m}</li>
                                             ))}
                                         </ul>
@@ -403,7 +448,7 @@ function App() {
 
                                     <div className="document-section">
                                         <h3>Arbetslivserfarenhet (Urval)</h3>
-                                        {cvMatchData.profile.erfarenhet.map((e, i) => (
+                                        {cvMatchData?.profile?.erfarenhet?.map((e, i) => (
                                             <div key={i} style={{ marginBottom: '15px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                                     <strong>{e.roll} @ {e.foretag}</strong>
@@ -416,7 +461,7 @@ function App() {
 
                                     <div className="document-section">
                                         <h3>Utbildning</h3>
-                                        {cvMatchData.profile.utbildning.map((u, i) => (
+                                        {cvMatchData?.profile?.utbildning?.map((u, i) => (
                                             <div key={i}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                                     <strong>{u.program}</strong>
@@ -461,11 +506,11 @@ function App() {
                                                         })
                                                             .then(res => res.json())
                                                             .then(data => {
-                                                                alert(`Uppdaterat! Importerade ${data.count} jobb frÃ¥n Notion.`);
-                                                                window.location.reload(); // Quick refresh to update stats and filters
+                                                                alert(`Uppdaterat! Importerade ${data.count} jobb från Notion.`);
+                                                                window.location.reload();
                                                             });
                                                     } catch (err) {
-                                                        alert("Fel vid lÃ¤sning av fil. Se till att det Ã¤r en giltig JSON.");
+                                                        alert("Fel vid läsning av fil.");
                                                     }
                                                 };
                                                 reader.readAsText(file);
@@ -476,9 +521,30 @@ function App() {
                             </div>
                         </div>
 
-                        <div style={{ marginTop: '2rem' }}>
-                            <h3>Publikationer</h3>
-                            {profile.publikationer.map((p, i) => <p key={i} className="text-secondary">{p}</p>)}
+                        <div className="profile-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                            <div>
+                                <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>Arbetslivserfarenhet</h3>
+                                {profile.erfarenhet.map((e, i) => (
+                                    <div key={i} style={{ marginBottom: '1.5rem', borderLeft: '2px solid var(--accent-primary)', paddingLeft: '1rem' }}>
+                                        <div style={{ fontWeight: 'bold' }}>{e.roll}</div>
+                                        <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>{e.foretag} • {e.period}</div>
+                                        <p style={{ fontSize: '0.85rem', marginTop: '0.5rem' }}>{e.beskrivning}</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
+                                <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>Utbildning</h3>
+                                {profile.utbildning.map((u, i) => (
+                                    <div key={i} style={{ marginBottom: '1.5rem', borderLeft: '2px solid var(--accent-secondary)', paddingLeft: '1rem' }}>
+                                        <div style={{ fontWeight: 'bold' }}>{u.program}</div>
+                                        <div style={{ fontSize: '0.9rem', opacity: 0.8 }}>{u.skola} • {u.period}</div>
+                                    </div>
+                                ))}
+                                <div style={{ marginTop: '2rem' }}>
+                                    <h3 style={{ marginBottom: '1rem', color: 'var(--accent-primary)' }}>Publikationer</h3>
+                                    {profile.publikationer.map((p, i) => <a key={i} href={p} target="_blank" className="text-secondary" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--accent-primary)' }}>{p}</a>)}
+                                </div>
+                            </div>
                         </div>
                     </section>
                 )}

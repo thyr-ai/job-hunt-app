@@ -403,11 +403,26 @@ button {
     padding: 0;
   }
 
-  .dashboard,
   .sidebar,
-  .main-content>section:not(.animate-fade),
-  .no-print {
+  .dashboard-nav,
+  nav,
+  .big-button,
+  .workflow-stepper,
+  .no-print,
+  .stats-card,
+  button {
     display: none !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  section {
+    display: block !important;
+    visibility: visible !important;
   }
 
   .animate-fade {
