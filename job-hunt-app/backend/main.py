@@ -25,11 +25,7 @@ async def root():
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://job-hunt-app-jet.vercel.app",
-        "*" # Temporarily allow all for debugging, but list the specific one too
-    ],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
