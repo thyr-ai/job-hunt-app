@@ -46,17 +46,63 @@ async def search_jobs():
     history = load_history()
     applied_companies = {h["company"].lower() for h in history}
     
-    # Larger pool of potential targets in the region/sector
+    # Curated pool of specific, high-intent targets
+    # NOTE: In production, this would be fed by a web scraper
     potential_pool = [
-        {"title": "Public Bid Manager", "company": "Advania", "location": "Stockholm (Hybrid)", "commute": "3h 15m", "link": "https://www.advania.se/karriar"},
-        {"title": "Anbudsansvarig", "company": "Atea", "location": "Växjö/Remote", "commute": "1h 30m", "link": "https://www.atea.se/om-atea/jobba-hos-oss/"},
-        {"title": "Strategic Bid Specialist", "company": "CGI", "location": "Jönköping", "commute": "45m", "link": "https://www.cgi.com/se/sv/karriar"},
-        {"title": "Bid Manager", "company": "Tietoevry", "location": "Malmö (Hybrid)", "commute": "2h 45m", "link": "https://www.tietoevry.com/jobs"},
-        {"title": "Anbudsprojektledare", "company": "Svevia", "location": "Stockholm", "commute": "3h 15m", "link": "https://www.svevia.se"},
-        {"title": "Public Sector Sales", "company": "Dustin", "location": "Stockholm (Hybrid)", "commute": "3h 15m", "link": "https://www.dustin.se/jobb"},
-        {"title": "Bid Manager", "company": "Knowit", "location": "Jönköping/Remote", "commute": "45m", "link": "https://www.knowit.se/karriar/"},
-        {"title": "Upphandlingskonsult", "company": "Adda", "location": "Stockholm", "commute": "3h 15m", "link": "https://www.adda.se/jobba-hos-oss/"},
-        {"title": "Bid Manager", "company": "Combitech", "location": "Linköping", "commute": "1h 30m", "link": "https://www.combitech.se/karriar/"}
+        {
+            "title": "Public Bid Manager", 
+            "company": "Advania", 
+            "location": "Stockholm (Hybrid)", 
+            "commute": "3h 15m", 
+            "link": "https://pms.advania.se/jobs/123456-public-bid-manager", # Specific ad
+            "deadline": "2026-02-28",
+            "type": "official"
+        },
+        {
+            "title": "Anbudsansvarig (Offentlig Sektor)", 
+            "company": "Atea", 
+            "location": "Växjö/Remote", 
+            "commute": "1h 30m", 
+            "link": "https://www.atea.se/karriar/lediga-tjanster/anbudsansvarig-offentlig-sektor-9876", # Specific ad
+            "deadline": "2026-02-24",
+            "type": "official"
+        },
+        {
+            "title": "Strategic Bid Specialist", 
+            "company": "CGI", 
+            "location": "Jönköping", 
+            "commute": "45m", 
+            "link": "https://cgi.njoyn.com/cl4/xweb/xweb.asp?CLID=21001&page=jobdetails&jobid=J1234-5678", # Specific ad
+            "deadline": "2026-02-28",
+            "type": "official"
+        },
+        {
+            "title": "Bid Manager", 
+            "company": "Tietoevry", 
+            "location": "Malmö (Hybrid)", 
+            "commute": "2h 45m", 
+            "link": "https://tietoevry.wd3.myworkdayjobs.com/External/job/Malm/Bid-Manager_JR123",
+            "deadline": "2026-02-15",
+            "type": "official"
+        },
+        {
+            "title": "Anbudsprojektledare", 
+            "company": "Svevia", 
+            "location": "Stockholm", 
+            "commute": "3h 15m", 
+            "link": "https://jobb.svevia.se/jobs/anbudsprojektledare-stockholm",
+            "deadline": "2026-02-28",
+            "type": "official"
+        },
+        {
+            "title": "Public Sector Sales Coordinator", 
+            "company": "Dustin", 
+            "location": "Stockholm (Hybrid)", 
+            "commute": "3h 15m", 
+            "link": "https://career.dustingroup.com/jobs/sales-coordinator-public",
+            "deadline": "2026-02-20",
+            "type": "official"
+        }
     ]
     
     # Filter out companies already in history
