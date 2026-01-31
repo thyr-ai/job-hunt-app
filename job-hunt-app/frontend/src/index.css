@@ -398,9 +398,21 @@ button {
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
   body {
-    background: white;
-    padding: 0;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .dashboard {
+    display: block !important;
+    background: white !important;
   }
 
   .sidebar,
@@ -410,7 +422,8 @@ button {
   .workflow-stepper,
   .no-print,
   .stats-card,
-  button {
+  button,
+  .loading {
     display: none !important;
   }
 
@@ -418,11 +431,14 @@ button {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    background: white !important;
   }
 
   section {
     display: block !important;
     visibility: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .animate-fade {
@@ -431,14 +447,28 @@ button {
     border: none !important;
     background: none !important;
     box-shadow: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 
   .document-view {
-    box-shadow: none;
-    margin: 0;
-    width: 100%;
-    max-width: none;
-    padding: 0;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    border: none !important;
+    font-size: 12pt !important;
+  }
+
+  .document-header h2 {
+    font-size: 28pt !important;
+  }
+
+  .document-section h3 {
+    font-size: 12pt !important;
+    border-bottom: 1px solid #000 !important;
+    margin-top: 20pt !important;
   }
 }
 
