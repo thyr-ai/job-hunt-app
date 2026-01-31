@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { CommentBox } from './components/DashboardComponents'
 
 const API_BASE = 'https://job-hunt-app-kkr6.onrender.com/api'
@@ -483,6 +484,7 @@ function App() {
                     </section>
                 )}
             </main>
+            <SpeedInsights />
         </div>
     )
 }
