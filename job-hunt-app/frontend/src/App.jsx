@@ -20,9 +20,16 @@ function App() {
     const choices = ["Tillväxt", "Samhällsnytta", "Teknik", "Ledarskap", "Erfarenhetsmatch", "Innovation", "Karriärbyte"]
 
     useEffect(() => {
+        console.log("Hämtar från:", `${API_BASE}/cv`);
         fetch(`${API_BASE}/cv`)
-            .then(res => res.json())
-            .then(data => setProfile(data))
+            .then(res => {
+                console.log("Svar status:", res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log("Profil laddad!");
+                setProfile(data);
+            })
             .catch(err => console.error("Backend error:", err))
 
         fetch(`${API_BASE}/history-stats`)
