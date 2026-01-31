@@ -9,6 +9,7 @@ import zipfile
 import io
 import pandas as pd
 import random
+from datetime import datetime, timedelta
 from data.cv import mattias_thyr_profile
 
 app = FastAPI(title="Job Hunt Dashboard API")
@@ -105,20 +106,38 @@ async def search_jobs():
         }
     ]
     
-    # Filter out companies already in history
-    filtered_targets = [
-        job for job in potential_pool 
-        if job["company"].lower() not in applied_companies
-    ]
+    # Filter by:
+    # 1. Company not already applied to
+    # 2. Deadline is in the future
+    # 3. Deadline is within 30 days from now
     
-    # Shuffle or select randomly for dynamism
-    selected_official = random.sample(filtered_targets, min(len(filtered_targets), 3))
+    # We use your current project time: 2026-01-31
+    now = datetime(2026, 1, 31)
+    max_date = now + timedelta(days=30)
+    
+    valid_targets = []
+    for job in potential_pool:
+        # Check company
+        if job["company"].lower() in applied_companies:
+            continue
+            
+        # Check date
+        try:
+            deadline_date = datetime.strptime(job["deadline"], "%Y-%m-%d")
+            if now < deadline_date <= max_date:
+                valid_targets.append(job)
+        except (ValueError, KeyError):
+            # If no deadline or bad format, it might be a fallback/ongoing role
+            # but for "Official Ads", we require a valid future date
+            continue
+    
+    # Shuffle from the valid list
+    selected_official = random.sample(valid_targets, min(len(valid_targets), 3))
     
     results = []
     for idx, job in enumerate(selected_official):
         results.append({
             "id": f"new-{idx}-{random.randint(100,999)}",
-            "type": "official",
             **job,
             "history": None
         })
