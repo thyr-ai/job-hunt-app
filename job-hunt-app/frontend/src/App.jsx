@@ -65,7 +65,8 @@ function App() {
                 title: job.title,
                 company: job.company,
                 choice: selectedChoice,
-                type: job.type
+                type: job.type,
+                lead_job: job.lead_job
             })
         })
             .then(res => res.json())

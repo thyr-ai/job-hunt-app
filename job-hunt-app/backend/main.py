@@ -143,16 +143,27 @@ async def search_jobs():
         })
         
     # Also add 3 "Cold Outreach" targets that are NOT in history yet
-    cold_reach_pool = ["Capgemini", "Sogeti", "Softronic", "Enfo", "Fujitsu", "Orange Cyberdefense", "Accenture", "IBM", "Verizon", "Telia"]
-    cold_targets = [c for c in cold_reach_pool if c.lower() not in applied_companies]
+    # These represent companies that are hiring in related areas (leads)
+    cold_reach_pool = [
+        {"company": "Capgemini", "lead_job": "Client Delivery Manager"},
+        {"company": "Sogeti", "lead_job": "Public Sector Sales"},
+        {"company": "Softronic", "lead_job": "Project Manager (GovTech)"},
+        {"company": "Enfo", "lead_job": "Account Manager"},
+        {"company": "Fujitsu", "lead_job": "Bid Specialist (Infrastructure)"},
+        {"company": "Accenture", "lead_job": "Contract Manager"},
+        {"company": "IBM", "lead_job": "Public Cloud Specialist"},
+        {"company": "Telia", "lead_job": "Business Manager (Regions)"}
+    ]
     
+    cold_targets = [c for c in cold_reach_pool if c["company"].lower() not in applied_companies]
     selected_cold = random.sample(cold_targets, min(len(cold_targets), 3))
     
-    for idx, company in enumerate(selected_cold):
+    for idx, item in enumerate(selected_cold):
         results.append({
             "id": f"cold-{idx}-{random.randint(100,999)}",
             "title": "Spontanansökan (Public Bid Ops)",
-            "company": company,
+            "company": item["company"],
+            "lead_job": item["lead_job"], # The "Hook"
             "location": "Strategy target",
             "commute": "-",
             "type": "spontaneous",
@@ -240,19 +251,22 @@ async def get_cv():
 async def generate_letter(details: Dict):
     company = details.get("company", "organisationen")
     role = details.get("title", "tjänsten")
+    job_type = details.get("type", "official")
+    lead_job = details.get("lead_job")
     
-    # Add context from history if available
-    history = load_history()
-    matches = [h for h in history if h["company"].lower() == company.lower()]
-    
-    context = ""
-    if matches:
-        last = sorted(matches, key=lambda x: x["applied_date"], reverse=True)[0]
-        context = f" Jag har tidigare haft kontakt med er angående rollen som {last['title']} under {last['applied_date'][:4]} och är fortsatt mycket intresserad av att bidra till er verksamhet."
+    # 1. Generate Email (Short & Positive)
+    if job_type == "spontaneous":
+        email_text = f"Hej {company}!\n\nJag har haft ögonen på er verksamhet under en period och noterar att ni just nu söker en {lead_job or 'ny kollega'}. Det signalerar för mig en spännande utvecklingsfas i er organisation.\n\nJag skriver till er då jag tror att jag med min bakgrund som generalist med en stadig grund i LOU och offentliga affärer kan stödja er i denna tillväxt, även om min profil sträcker sig utanför just den specifika annonsen.\n\nBifogar mitt CV och ett kort brev. Har ni tid för en kort avstämning kring hur jag skulle kunna stärka ert team?\n\nMed vänlig hälsning,\nMattias Thyr"
+        letter_text = f"Här är ett personligt brev anpassat för en spontanansökan till {company}..."
+    else:
+        # Official application
+        email_text = f"Hej!\n\nJag söker härmed tjänsten som {role} hos er på {company}. Bifogat finner ni mitt CV och personliga brev där jag beskriver hur min erfarenhet matchar era behov.\n\nSer fram emot att höra från er!\n\nVänliga hälsningar,\nMattias Thyr"
+        letter_text = f"Till {company},\n\nJag skriver till er för att uttrycka mitt starka intresse för tjänsten som {role}..."
 
-    letter_text = f"Hej {company}!\n\nJag söker nu rollen som {role}.{context}\n\nMed vänlig hälsning,\nMattias Thyr"
-    
-    return {"letter": letter_text}
+    return {
+        "email": email_text,
+        "letter": letter_text
+    }
 
 from fastapi.responses import FileResponse
 from fpdf import FPDF
