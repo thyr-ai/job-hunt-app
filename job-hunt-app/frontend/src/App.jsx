@@ -104,7 +104,7 @@ function App() {
             })
     }
 
-    if (!profile) return <div className="loading">Hämtar profil...</div>
+    if (!profile) return <div className="loading">Synkar med Molnet... 🚀</div>
 
     return (
         <div className="dashboard">
