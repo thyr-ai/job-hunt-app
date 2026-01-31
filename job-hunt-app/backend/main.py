@@ -8,6 +8,7 @@ import os
 import zipfile
 import io
 import pandas as pd
+import random
 from data.cv import mattias_thyr_profile
 
 app = FastAPI(title="Job Hunt Dashboard API")
@@ -64,23 +65,27 @@ async def search_jobs():
         if job["company"].lower() not in applied_companies
     ]
     
-    # Take the top 3 new ones
+    # Shuffle or select randomly for dynamism
+    selected_official = random.sample(filtered_targets, min(len(filtered_targets), 3))
+    
     results = []
-    for idx, job in enumerate(filtered_targets[:3]):
+    for idx, job in enumerate(selected_official):
         results.append({
-            "id": f"new-{idx}",
+            "id": f"new-{idx}-{random.randint(100,999)}",
             "type": "official",
             **job,
             "history": None
         })
         
     # Also add 3 "Cold Outreach" targets that are NOT in history yet
-    cold_reach_pool = ["Capgemini", "Sogeti", "Softronic", "Enfo", "Fujitsu", "Orange Cyberdefense"]
+    cold_reach_pool = ["Capgemini", "Sogeti", "Softronic", "Enfo", "Fujitsu", "Orange Cyberdefense", "Accenture", "IBM", "Verizon", "Telia"]
     cold_targets = [c for c in cold_reach_pool if c.lower() not in applied_companies]
     
-    for idx, company in enumerate(cold_targets[:3]):
+    selected_cold = random.sample(cold_targets, min(len(cold_targets), 3))
+    
+    for idx, company in enumerate(selected_cold):
         results.append({
-            "id": f"cold-{idx}",
+            "id": f"cold-{idx}-{random.randint(100,999)}",
             "title": "Spontanansökan (Public Bid Ops)",
             "company": company,
             "location": "Strategy target",
