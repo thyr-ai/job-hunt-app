@@ -43,66 +43,52 @@ def load_history():
 @app.get("/api/search")
 async def search_jobs():
     history = load_history()
+    applied_companies = {h["company"].lower() for h in history}
     
-    # In a real app, this would call an external API (Platsbanken/LinkedIn)
-    # For now, we suggest 3 high-quality strategic roles + 3 based on your history
-    strategic_targets = [
-        {
-            "id": "s1",
-            "title": "Public Bid Manager",
-            "company": "Advania",
-            "location": "Stockholm (Hybrid)",
-            "commute": "3h 15m",
-            "type": "official",
-            "link": "https://www.advania.se/karriar"
-        },
-        {
-            "id": "s2",
-            "title": "Anbudsansvarig",
-            "company": "Atea",
-            "location": "Växjö/Remote",
-            "commute": "1h 30m",
-            "type": "official",
-            "link": "https://www.atea.se/om-atea/jobba-hos-oss/"
-        },
-        {
-            "id": "s3",
-            "title": "Strategic Bid Specialist",
-            "company": "CGI",
-            "location": "Jönköping",
-            "commute": "45m",
-            "type": "official",
-            "link": "https://www.cgi.com/se/sv/karriar"
-        }
+    # Larger pool of potential targets in the region/sector
+    potential_pool = [
+        {"title": "Public Bid Manager", "company": "Advania", "location": "Stockholm (Hybrid)", "commute": "3h 15m", "link": "https://www.advania.se/karriar"},
+        {"title": "Anbudsansvarig", "company": "Atea", "location": "Växjö/Remote", "commute": "1h 30m", "link": "https://www.atea.se/om-atea/jobba-hos-oss/"},
+        {"title": "Strategic Bid Specialist", "company": "CGI", "location": "Jönköping", "commute": "45m", "link": "https://www.cgi.com/se/sv/karriar"},
+        {"title": "Bid Manager", "company": "Tietoevry", "location": "Malmö (Hybrid)", "commute": "2h 45m", "link": "https://www.tietoevry.com/jobs"},
+        {"title": "Anbudsprojektledare", "company": "Svevia", "location": "Stockholm", "commute": "3h 15m", "link": "https://www.svevia.se"},
+        {"title": "Public Sector Sales", "company": "Dustin", "location": "Stockholm (Hybrid)", "commute": "3h 15m", "link": "https://www.dustin.se/jobb"},
+        {"title": "Bid Manager", "company": "Knowit", "location": "Jönköping/Remote", "commute": "45m", "link": "https://www.knowit.se/karriar/"},
+        {"title": "Upphandlingskonsult", "company": "Adda", "location": "Stockholm", "commute": "3h 15m", "link": "https://www.adda.se/jobba-hos-oss/"},
+        {"title": "Bid Manager", "company": "Combitech", "location": "Linköping", "commute": "1h 30m", "link": "https://www.combitech.se/karriar/"}
     ]
     
-    # Add 3 spontaneous targets from your history (companies you've looked at before)
-    if history:
-        unique_companies = list(set([h["company"] for h in history]))[:3]
-        for idx, company in enumerate(unique_companies):
-            strategic_targets.append({
-                "id": f"h{idx}",
-                "title": "Spontanansökan (Bid Ops)",
-                "company": company,
-                "location": "Se historik",
-                "commute": "-",
-                "type": "spontaneous",
-                "link": ""
-            })
-
-    # Enrich with history flags
+    # Filter out companies already in history
+    filtered_targets = [
+        job for job in potential_pool 
+        if job["company"].lower() not in applied_companies
+    ]
+    
+    # Take the top 3 new ones
     results = []
-    for job in strategic_targets:
-        matches = [h for h in history if h["company"].lower() == job["company"].lower()]
-        history_info = None
-        if matches:
-            latest = sorted(matches, key=lambda x: x["applied_date"], reverse=True)[0]
-            history_info = {
-                "last_applied": latest["applied_date"],
-                "last_status": latest["status"]
-            }
+    for idx, job in enumerate(filtered_targets[:3]):
+        results.append({
+            "id": f"new-{idx}",
+            "type": "official",
+            **job,
+            "history": None
+        })
         
-        results.append({**job, "history": history_info})
+    # Also add 3 "Cold Outreach" targets that are NOT in history yet
+    cold_reach_pool = ["Capgemini", "Sogeti", "Softronic", "Enfo", "Fujitsu", "Orange Cyberdefense"]
+    cold_targets = [c for c in cold_reach_pool if c.lower() not in applied_companies]
+    
+    for idx, company in enumerate(cold_targets[:3]):
+        results.append({
+            "id": f"cold-{idx}",
+            "title": "Spontanansökan (Public Bid Ops)",
+            "company": company,
+            "location": "Strategy target",
+            "commute": "-",
+            "type": "spontaneous",
+            "link": "",
+            "history": None
+        })
         
     return results
 
