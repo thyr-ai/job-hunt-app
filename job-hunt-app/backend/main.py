@@ -101,9 +101,19 @@ async def search_jobs():
 @app.get("/api/history-stats")
 async def get_history_stats():
     history = load_history()
+    
+    # Get last modified time of the history file
+    last_sync = None
+    history_path = "data/notion_jobs.json"
+    if os.path.exists(history_path):
+        mtime = os.path.getmtime(history_path)
+        from datetime import datetime
+        last_sync = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+
     stats = {
         "total": len(history),
-        "by_status": {}
+        "by_status": {},
+        "last_sync": last_sync
     }
     for item in history:
         status = item.get("status", "Okänd")

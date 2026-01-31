@@ -117,7 +117,7 @@ function App() {
         <div className="dashboard">
             <aside className="sidebar">
                 <div className="card profile-summary">
-                    <img src="http://localhost:8000/static/profile.jpg" alt="Profile" />
+                    <img src={`${API_BASE.replace('/api', '')}/static/profile.jpg`} alt="Profile" onError={(e) => e.target.src = 'https://via.placeholder.com/100'} />
                     <h1>{profile.kontakt_info.namn}</h1>
                     <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>{profile.kontakt_info.titel}</p>
                 </div>
@@ -136,7 +136,14 @@ function App() {
 
                 {stats && (
                     <div className="card stats-card" style={{ marginTop: '1rem', padding: '1.2rem' }}>
-                        <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', opacity: 0.6 }}>Statistik (Notion)</h4>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <h4 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.6, margin: 0 }}>Statistik (Notion)</h4>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem' }}>
+                                <span className="pulse-dot"></span>
+                                <span style={{ color: 'var(--accent-secondary)' }}>Live</span>
+                            </div>
+                        </div>
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div>
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{stats.total}</div>
@@ -149,6 +156,12 @@ function App() {
                                 <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>Aktiva</div>
                             </div>
                         </div>
+
+                        {stats.last_sync && (
+                            <div style={{ fontSize: '0.65rem', opacity: 0.5, marginTop: '1rem', fontStyle: 'italic' }}>
+                                Senast synkad: {stats.last_sync}
+                            </div>
+                        )}
 
                         <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
                             <label className="upload-btn" style={{
