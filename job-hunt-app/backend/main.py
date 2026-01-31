@@ -44,57 +44,65 @@ def load_history():
 async def search_jobs():
     history = load_history()
     
-    # Mock search results representing your current focus
-    potential_jobs = [
+    # In a real app, this would call an external API (Platsbanken/LinkedIn)
+    # For now, we suggest 3 high-quality strategic roles + 3 based on your history
+    strategic_targets = [
         {
-            "id": 1,
+            "id": "s1",
             "title": "Public Bid Manager",
-            "company": "Tietoevry",
-            "location": "Malmö (Hybrid)",
-            "distance": "220km",
-            "commute": "2h 45m",
-            "email": "career.malmo@tietoevry.com",
-            "link": "https://www.tietoevry.com/jobs"
+            "company": "Advania",
+            "location": "Stockholm (Hybrid)",
+            "commute": "3h 15m",
+            "type": "official",
+            "link": "https://www.advania.se/karriar"
         },
         {
-            "id": 2,
-            "title": "Senior Bid Manager",
-            "company": "Dustin",
-            "location": "Stockholm",
-            "distance": "320km",
-            "commute": "3h 15m",
-            "email": "hr.securitas@securitas.se",
-            "link": "https://www.securitastechnology.com"
+            "id": "s2",
+            "title": "Anbudsansvarig",
+            "company": "Atea",
+            "location": "Växjö/Remote",
+            "commute": "1h 30m",
+            "type": "official",
+            "link": "https://www.atea.se/om-atea/jobba-hos-oss/"
         },
         {
-            "id": 3,
-            "title": "Anbudsprojektledare",
-            "company": "Svevia",
-            "location": "Stockholm",
-            "distance": "320km",
-            "commute": "3h 15m",
-            "email": "rekrytering@svevia.se",
-            "link": "https://www.svevia.se"
+            "id": "s3",
+            "title": "Strategic Bid Specialist",
+            "company": "CGI",
+            "location": "Jönköping",
+            "commute": "45m",
+            "type": "official",
+            "link": "https://www.cgi.com/se/sv/karriar"
         }
     ]
     
-    # Enrich with history
+    # Add 3 spontaneous targets from your history (companies you've looked at before)
+    if history:
+        unique_companies = list(set([h["company"] for h in history]))[:3]
+        for idx, company in enumerate(unique_companies):
+            strategic_targets.append({
+                "id": f"h{idx}",
+                "title": "Spontanansökan (Bid Ops)",
+                "company": company,
+                "location": "Se historik",
+                "commute": "-",
+                "type": "spontaneous",
+                "link": ""
+            })
+
+    # Enrich with history flags
     results = []
-    for job in potential_jobs:
+    for job in strategic_targets:
         matches = [h for h in history if h["company"].lower() == job["company"].lower()]
         history_info = None
         if matches:
             latest = sorted(matches, key=lambda x: x["applied_date"], reverse=True)[0]
             history_info = {
-                "total_applications": len(matches),
                 "last_applied": latest["applied_date"],
                 "last_status": latest["status"]
             }
         
-        results.append({
-            **job,
-            "history": history_info
-        })
+        results.append({**job, "history": history_info})
         
     return results
 

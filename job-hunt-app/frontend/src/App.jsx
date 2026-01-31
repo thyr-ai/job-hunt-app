@@ -117,8 +117,21 @@ function App() {
         <div className="dashboard">
             <aside className="sidebar">
                 <div className="card profile-summary">
-                    <img src={`${API_BASE.replace('/api', '')}/static/profile.jpg`} alt="Profile" onError={(e) => e.target.src = 'https://via.placeholder.com/100'} />
-                    <h1>{profile.kontakt_info.namn}</h1>
+                    <div className="profile-placeholder" style={{
+                        width: '80px',
+                        height: '80px',
+                        background: 'linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%)',
+                        borderRadius: '50%',
+                        margin: '0 auto 1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '2rem',
+                        boxShadow: '0 10px 20px rgba(99, 102, 241, 0.3)'
+                    }}>
+                        {profile.kontakt_info.namn.charAt(0)}
+                    </div>
+                    <h1 style={{ fontSize: '1.2rem', marginBottom: '0.25rem' }}>{profile.kontakt_info.namn}</h1>
                     <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>{profile.kontakt_info.titel}</p>
                 </div>
 
