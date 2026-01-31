@@ -21,7 +21,11 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://job-hunt-app-jet.vercel.app",
+        "*" # Temporarily allow all for debugging, but list the specific one too
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
