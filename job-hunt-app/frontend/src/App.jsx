@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { CommentBox } from './components/DashboardComponents'
 
 // Use relative path so Vite proxy can handle it (bypasses CORS/Antivirus issues)
@@ -549,6 +550,7 @@ ${edu}
                     </section>
                 )}
             </main>
+            <SpeedInsights />
         </div>
     )
 }
